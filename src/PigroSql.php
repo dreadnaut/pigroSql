@@ -83,11 +83,11 @@ class PigroDatabase
     return $statement->fetchAll();
   }
 
-  public function conta(string $query, mixed $parametri = []) : int
+  public function valore(string $query, mixed $parametri = []) : mixed
   {
     $statement = $this->esegui($query, $parametri);
     $statement->setFetchMode(PDO::FETCH_COLUMN, 0);
-    return intval($statement->fetch());
+    return $statement->fetch();
   }
 
   public function tabella(string $nome) : PigroTabella
