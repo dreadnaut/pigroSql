@@ -13,14 +13,16 @@ Richiede PHP 8.1 o superiore.
 ### Connessione al database
 
 ```php
+require 'PigroSql.php';
+
 # MySQL
-$db = new PigroDatabase("mysql:host=...;dbname=...", $username, $password);
+$db = new Pigro\Database("mysql:host=...;dbname=...", $username, $password);
 
 # MySQL su Altervista
-$db = PigroDatabase::mysqlAltervista($nick);
+$db = Pigro\Database::mysqlAltervista($nick);
 
 # SQLite
-$db = new PigroDatabase('sqlite:file_del_database.sqlite');
+$db = new Pigro\Database('sqlite:file_del_database.sqlite');
 ```
 
 ### Eseguire una query
@@ -119,7 +121,7 @@ forma di array associativo. Si può modificare il default al momento
 dell'inizializzazione:
 
 ```php
-$db = new PigroDatabase(
+$db = new Pigro\Database(
   'sqlite:file_del_database.sqlite',
   formatoRisultati: PDO::FETCH_OBJ
 );

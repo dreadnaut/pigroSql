@@ -1,10 +1,12 @@
 <?php
 
-class PigroDatabase
+namespace Pigro;
+
+class Database
 {
   public static function mysqlAltervista(
     string $nick,
-    int $formatoRisultati = PDO::FETCH_ASSOC,
+    int $formatoRisultati = \PDO::FETCH_ASSOC,
   ) : self
   {
     return new self(
@@ -14,21 +16,21 @@ class PigroDatabase
     );
   }
 
-  public readonly PDO $pdo;
+  public readonly \PDO $pdo;
 
   public function __construct(
     string $connessione,
     string $utente = null,
     string $password = null,
-    int $formatoRisultati = PDO::FETCH_ASSOC,
+    int $formatoRisultati = \PDO::FETCH_ASSOC,
   ) {
-    $this->pdo = new PDO($connessione, $utente, $password);
-    $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $formatoRisultati);
-    $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $this->pdo = new \PDO($connessione, $utente, $password);
+    $this->pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, $formatoRisultati);
+    $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
   }
 
-  public function esegui(string $query, mixed $parametri = [], $classe = null) : PDOStatement
+  public function esegui(string $query, mixed $parametri = [], $classe = null) : \PDOStatement
   {
     if (empty($parametri)) {
       return $this->pdo->query($query);
@@ -39,18 +41,18 @@ class PigroDatabase
     $statement = $this->pdo->prepare($query);
     $statement->execute($parametri);
     if ($classe) {
-      $statement->setFetchMode(PDO::FETCH_CLASS, $classe);
+      $statement->setFetchMode(\PDO::FETCH_CLASS, $classe);
     }
     return $statement;
   }
 
-  public function transazione(Closure $codice)
+  public function transazione(\Closure $codice)
   {
     $this->pdo->beginTransaction();
     try {
       $codice($this);
       return $this->pdo->commit();
-    } catch (Exception $ex) {
+    } catch (\Exception $ex) {
       $this->pdo->rollback();
       throw $ex;
     }
@@ -68,7 +70,7 @@ class PigroDatabase
     return $statement->fetchAll();
   }
 
-  public function unoAllaVolta(...$parametriEsegui) : Generator
+  public function unoAllaVolta(...$parametriEsegui) : \Generator
   {
     $statement = $this->esegui(...$parametriEsegui);
     while ($risultato = $statement->fetch()) {
@@ -79,20 +81,20 @@ class PigroDatabase
   public function colonna(string $query, mixed $parametri = [], $indiceColonna = 0) : array
   {
     $statement = $this->esegui($query, $parametri);
-    $statement->setFetchMode(PDO::FETCH_COLUMN, $indiceColonna);
+    $statement->setFetchMode(\PDO::FETCH_COLUMN, $indiceColonna);
     return $statement->fetchAll();
   }
 
   public function valore(string $query, mixed $parametri = []) : mixed
   {
     $statement = $this->esegui($query, $parametri);
-    $statement->setFetchMode(PDO::FETCH_COLUMN, 0);
+    $statement->setFetchMode(\PDO::FETCH_COLUMN, 0);
     return $statement->fetch();
   }
 
-  public function tabella(string $nome) : PigroTabella
+  public function tabella(string $nome) : Tabella
   {
-    return new PigroTabella($nome, $this);
+    return new Tabella($nome, $this);
   }
 
   public function indicizza(array $risultati, string $campo) : array
@@ -115,7 +117,7 @@ class PigroDatabase
   private function espandiParametri(string $query, array $parametri) : array
   {
     foreach ($parametri as $chiave => $valore) {
-      if (is_a($valore, DateTimeInterface::class)) {
+      if (is_a($valore, \DateTimeInterface::class)) {
         $parametri[$chiave] = $valore->format('Y-m-d H:i:s');
       }
     }
@@ -161,11 +163,11 @@ class PigroDatabase
   }
 }
 
-class PigroTabella
+class Tabella
 {
   public function __construct(
     private string $tabella,
-    private PigroDatabase $database,
+    private Database $database,
   ) {
   }
 
@@ -193,7 +195,7 @@ class PigroTabella
   {
     $query = $this->preparaSelect('COUNT(*)', $where);
     $statement = $this->database->esegui($query, $where);
-    $statement->setFetchMode(PDO::FETCH_COLUMN, 0);
+    $statement->setFetchMode(\PDO::FETCH_COLUMN, 0);
     return $statement->fetch();
   }
 
