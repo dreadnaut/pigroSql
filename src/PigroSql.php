@@ -20,8 +20,8 @@ class Database
 
   public function __construct(
     string $connessione,
-    string $utente = null,
-    string $password = null,
+    ?string $utente = null,
+    ?string $password = null,
     int $formatoRisultati = \PDO::FETCH_ASSOC,
   ) {
     $this->pdo = new \PDO($connessione, $utente, $password);
@@ -30,7 +30,7 @@ class Database
     $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
   }
 
-  public function esegui(string $query, mixed $parametri = [], $classe = null) : \PDOStatement
+  public function esegui(string $query, mixed $parametri = [], ?string $classe = null) : \PDOStatement
   {
     if (empty($parametri)) {
       return $this->pdo->query($query);
@@ -173,10 +173,10 @@ class Tabella
 
   public function tutti(
     array $where = [],
-    string $orderBy = null,
-    int $limit = null,
-    int $offset = null,
-    string $classe = null,
+    ?string $orderBy = null,
+    ?int $limit = null,
+    ?int $offset = null,
+    ?string $classe = null,
   ) : array
   {
     $query = $this->preparaSelect('*', $where, $orderBy, $limit, $offset);
@@ -184,7 +184,7 @@ class Tabella
     return $statement->fetchAll();
   }
 
-  public function uno(array $where, string $classe = null) : mixed
+  public function uno(array $where, ?string $classe = null) : mixed
   {
     $query = $this->preparaSelect('*', $where, limit: 1);
     $statement = $this->database->esegui($query, $where, $classe);
@@ -240,9 +240,9 @@ class Tabella
   private function preparaSelect(
     string $colonne,
     array $where,
-    string $orderBy = null,
-    int $limit = null,
-    int $offset = null,
+    ?string $orderBy = null,
+    ?int $limit = null,
+    ?int $offset = null,
   ) : string
   {
     $query = "SELECT {$colonne} FROM `{$this->tabella}`";
